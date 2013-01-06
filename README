@@ -1,6 +1,6 @@
 Author: Rehtal
 Time: 2013.1
-Version: 0.1
+Version: 0.3
 
 Description:
 
@@ -8,4 +8,5 @@ A instant messenger program that use p2p and implemented by python.
 This is a super easy program.
 
 TODO:
-	Nothing now.
+	1. Add socket events.
+	2. Test.

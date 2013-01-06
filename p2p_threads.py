@@ -32,7 +32,8 @@ class P2PThread(threading.Thread):
 		# Block here until new host shows up.
 		self.job_event.wait()
 
-		send_socket.connect(self.dest_addr)
+		dest_addr = self.unhandled_hosts.pop()
+		send_socket.connect(dest_addr)
 
 		msg = msg.construct_msg(CTRL_PORT, self.src_port)
 		send_socket.sent(msg)
