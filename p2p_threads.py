@@ -6,7 +6,6 @@ Implement the thread class we need to use.
 """
 import threading
 import socket
-from random import randint
 import msg
 
 class P2PThread(threading.Thread):
@@ -20,7 +19,6 @@ class P2PThread(threading.Thread):
 		self.unhandled_hosts = unhandled_hosts
 		self.job_event = job_event
 		# Allocate a port for receiving.
-		self.src_port = randint(49152, 65535)
 
 	def run(self):
 		"""Connect destination and communicate."""

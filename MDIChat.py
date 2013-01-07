@@ -8,23 +8,19 @@ import wx
 import time
 import os
 
+
 class MDIChatFrame(wx.MDIChildFrame):
-	def __init__(self, parent, user_name, list_item):
-		wx.MDIChildFrame.__init__(self, parent, title=user_name,
-			name=user_name) 
-		self.list_item = list_item
+	def __init__(self, parent):
+		wx.MDIChildFrame.__init__(self, parent)
 
 		# Attr for receiving new messages.
 		self.new_msg_attr = wx.TextAttr('yellow')
-
-		# History messages & new messages.
+		
+		# Frames of history messages & new messages.
 		self.history_msg = wx.TextCtrl(self,
 			style=wx.TE_MULTILINE|wx.TE_READONLY|wx.HSCROLL)
 		self.new_msg = wx.TextCtrl(self,
 			style=wx.TE_MULTILINE|wx.TE_PROCESS_ENTER)
-
-		# Bind.
-		self.Bind(wx.EVT_TEXT_ENTER, self.OnSendMsg, self.new_msg)
 
 		# Combine.
 		sizer = wx.BoxSizer(wx.VERTICAL)
@@ -37,22 +33,43 @@ class MDIChatFrame(wx.MDIChildFrame):
 
 		# Show.
 		self.SetSizer(border)
+		self.Show(False)
+
+		# Bind.
+		self.Bind(wx.EVT_TEXT_ENTER, self.OnSendMsg, self.new_msg)
+
+	def Active(self, parent, host_info, list_item):
+		"""Two-step construction."""
+		host_name = host_info['name']
+		self.Create(parent, title=host_name, name=host_name)
+		self.list_item = list_item
+
+		# Chat session.
+		host_addr = host_info['addr']
+		src_port = host_info['src_port']
+		self.chat_session = Communicate.ChatSession(host_addr,
+			src_port, self)
+
 		self.Show(True)
 
 	def OnSendMsg(self, event):
 		"""Send new message."""
-		# Get message from event.
-		msg = os.uname()[1].decode('utf8') + u': '\
+		# Send message.
+		msg = event.GetString() + '\n'
+		self.chat_session.new_msg(msg)
+
+		# Flush local history.
+		full_msg = u"Me" + u': '\
 			+ time.strftime("%Y-%m-%d %X",
 			time.localtime()).decode('utf8')\
-			+ u'\n' + event.GetString() + u'\n\n'
+			+ u'\n' + msg + u'\n'
 		self.history_msg.AppendText(msg)
 		self.new_msg.Clear()
 
 	def OnRecvMsg(self, event):
 		"""Receive new message."""
 		# Get message from event.
-		msg = ''
+		msg = event.GetString()
 		if self.IsShownOnSceen()==False:
 			self.list_item.SetBackgroundColour('yellow')
 			begin = self.history_msg.GetLastPosition()
@@ -75,3 +92,4 @@ if __name__ == '__main__':
 
 	app = MyApp(False)
 	app.MainLoop()
+	asyncore.loop()
